@@ -7,13 +7,10 @@ require(['jquery', 'bootstrap', 'd3', 'packages'],
     });
   };  // log
   function empty() {
-    $('#table').empty();
-    $('#graph').empty();
-    $('#legend').empty();
+    $('#result').empty();
   };  // empty
   function render_table(data) {
-    empty();
-    $('#table').append('<thead></thead><tbody></tbody>');
+    $('#result').append('<table class="table" id="table"><thead></thead><tbody></tbody></table>');
     $.each(data, function(idx, entry) {
       if (idx == 0) {
         var thead = '';
@@ -33,8 +30,11 @@ require(['jquery', 'bootstrap', 'd3', 'packages'],
       $('#table tbody').append(tbody);
     });
   };  // render_table
+  function render_orly(data) {
+    $('#result').append('<pre>' + JSON.stringify(data, null, '  ') + '</pre>');
+  }
   function render_graph(links) {
-    empty();
+    $('#result').append('<div id="graph"></div><div id="legend"></div>');
     var width = 720, height = 300;
     var color = d3.scale.category10();
     var force = d3.layout.force()
@@ -195,6 +195,7 @@ require(['jquery', 'bootstrap', 'd3', 'packages'],
           // Populate the args table depending on the selected function.
           $('#function').unbind().change(function() {
             var fn_name = $('#function').val();
+            empty();
             $('#args tbody').empty();
             $.each(pkgs[name].functions[fn_name], function(key, val) {
               $('#args tbody').append(
@@ -221,7 +222,9 @@ require(['jquery', 'bootstrap', 'd3', 'packages'],
                $('#function').val() + ' ' +
                '<{' + args.join(', ') + '}>;', function(data) {
             try {
+              empty();
               if (data.status !== "ok") {
+                $('#result').append('<div id="error_report" class="alert alert-danger"><b>' + data.status + ':</b> ' + data.result + '</div>');
                 return;
               }  // if
               var result = $.parseJSON(data.result);
@@ -235,7 +238,7 @@ require(['jquery', 'bootstrap', 'd3', 'packages'],
                   break;
                 }  // case
                 default: {
-                  console.log(result);
+                  render_orly(result);
                   break;
                 }  // default
               }  // switch
@@ -297,6 +300,9 @@ require(['jquery', 'bootstrap', 'd3', 'packages'],
         var btn = $('#' + name);
         btn.change(function() {
           send('get_source ' + name + ';', function(data) {
+            empty();
+            $('#function').empty();
+            $('#args tbody').empty();
             var result = data.result;
             $('#orlyscript').val(result.code);
             load(name, info.version);

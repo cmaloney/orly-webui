@@ -47,7 +47,8 @@
                                    'id' => 'run')); }}
     </div>
   </div>
-  <table class='table' id='table'></table>
+  <h2>Result:</h2>
+  <div id="result"></div>
   <div id='graph'></div>
   <div id='legend'></div>
   <div class='panel panel-default'>
