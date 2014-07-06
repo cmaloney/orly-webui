@@ -8,49 +8,51 @@
 @section('content')
 <div class='container'>
   <div class='page-header'>
-    <h1>Sample Datasets <small>Click to load and play</small></h1>
-    <div id='datasets' class='btn-group' data-toggle='buttons'></div>
+    <h1>Orly Web UI<small> Click a dataset to explore</small>
+      <span id='connection_status' class="label pull-right"></span>
+    </h1>
+    <ul id='datasets' class='nav nav-tabs' role='tablist'></ul>
+    <div id='connection' class='fade in'></div>
   </div>
-  <div id='connection' class='alert fade in'></div>
-  <div class='panel panel-default'>
-    <div class='panel-heading'>
-      <h3 class='panel-title'>
-        <b>OrlyScript</b>
-        {{ Form::button('Compile', array('class' => 'btn btn-default',
-                                         'data-target' => 'modal',
-                                         'data-toggle' => 'modal',
-                                         'id' => 'compile')); }}
-      </h3>
+  <div id='query' class='panel hide'>
+    <div class='panel panel-default'>
+      <div class='panel-heading'>
+        <h3 class='panel-title'>
+          <b>OrlyScript</b>
+          {{ Form::button('Compile', array('class' => 'btn btn-default',
+                                           'data-target' => 'modal',
+                                           'data-toggle' => 'modal',
+                                           'id' => 'compile')); }}
+        </h3>
+      </div>
+      {{ Form::textarea('orlyscript', '', array('class' => 'form-control',
+                                                'id' => 'orlyscript')); }}
     </div>
-    {{ Form::textarea('orlyscript', '', array('class' => 'form-control',
-                                              'id' => 'orlyscript')); }}
+    <div class='row'>
+      <div class='col-lg-4 col-md-4 col-sm-4'>
+        <select id='function' class='form-control input-medium'></select>
+      </div>
+      <div class='col-lg-6 col-md-6 col-sm-6'>
+        <table class='table' id='args'>
+          <thead>
+            <tr>
+              <th>parameter</th>
+              <th>argument</th>
+            </tr>
+          </thead>
+          <tbody>
+          </tbody>
+        </table>
+      </div>
+      <div class='col-lg-2 col-md-2 col-sm-2'>
+        {{ Form::button('Run', array('class' => 'btn btn-default',
+                                     'data-loading-text' => 'Running...',
+                                     'id' => 'run')); }}
+      </div>
+    </div>
+    <h2>Result:</h2>
+    <div id="result"></div>
   </div>
-  <div class='row'>
-    <div class='col-lg-4 col-md-4 col-sm-4'>
-      <select id='function' class='form-control input-medium'></select>
-    </div>
-    <div class='col-lg-6 col-md-6 col-sm-6'>
-      <table class='table' id='args'>
-        <thead>
-          <tr>
-            <th>parameter</th>
-            <th>argument</th>
-          </tr>
-        </thead>
-        <tbody>
-        </tbody>
-      </table>
-    </div>
-    <div class='col-lg-2 col-md-2 col-sm-2'>
-      {{ Form::button('Run', array('class' => 'btn btn-default',
-                                   'data-loading-text' => 'Running...',
-                                   'id' => 'run')); }}
-    </div>
-  </div>
-  <h2>Result:</h2>
-  <div id="result"></div>
-  <div id='graph'></div>
-  <div id='legend'></div>
   <div class='panel panel-default'>
     <div class='panel-heading'>
       <h3 class='panel-title'><b>Log</b></h3>

@@ -159,17 +159,22 @@ require(['jquery', 'bootstrap', 'd3', 'packages'],
   function send(cmd, cb) {
     websocket.onmessage = function(resp) {
       log('received: ' + resp.data);
+      data = $.parseJSON(resp.data);
+      // If something went wrong, let the user know
+      if (data.status !== "ok") {
+        $('#connection').append('<div class="alert alert-danger alert-dismissable"><button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button><b>' + data.status + ':</b> ' + data.result + '</div>');
+      } else {
+      }
       if (cb) {
-        cb($.parseJSON(resp.data));
-      }  // if
+        cb(data.result);
+      }
     };
     websocket.send(cmd);
     log('sent: ' + cmd);
   };  // send
   function load(name, version) {
     send('install ' + name + '.' + version + ';', function() {
-      send('list_packages;', function(data) {
-        var result = data.result;
+      send('list_packages;', function(result) {
         var pkg_info = result.packages.filter(function(elem, idx) {
           return elem.name == name;
         })[0];
@@ -223,11 +228,7 @@ require(['jquery', 'bootstrap', 'd3', 'packages'],
                '<{' + args.join(', ') + '}>;', function(data) {
             try {
               empty();
-              if (data.status !== "ok") {
-                $('#result').append('<div id="error_report" class="alert alert-danger"><b>' + data.status + ':</b> ' + data.result + '</div>');
-                return;
-              }  // if
-              var result = $.parseJSON(data.result);
+              var result = $.parseJSON(data);
               switch (result.type) {
                 case 'table': {
                   render_table(result.data);
@@ -253,42 +254,36 @@ require(['jquery', 'bootstrap', 'd3', 'packages'],
   // For each preset package, the first time it gets pressed, install the package.
   $.each(pkgs, function(name, info) {
     // Construct a label and attach to dataset buttons.
-    var label = $('<label></label>')
-                    .attr('class', 'btn btn-default dataset')
-                    .attr('id', name)
-                    .append($('<input>').attr('type', 'radio'))
-                    .append(info.desc);
+    var label = $('<li></li>').append('<a id="' + name + '" href="#' + name + '" role="tab" data-toggle="tab">' +
+                                      info.desc + '</a>');
     $('#datasets').append(label);
   });
   websocket.onclose = function() {
-    $('#connection').removeClass('alert-success')
-                    .addClass('alert-danger')
+    $('#connection_status').removeClass('label-success')
+                    .addClass('label-danger')
                     .text('Connection closed');
   };
   websocket.onerror = function() {
-    $('#connection').removeClass('alert-success')
-                    .addClass('alert-danger')
+    $('#connection_status').removeClass('label-success')
+                    .addClass('label-danger')
                     .text('Failed to connect');
   };
   websocket.onopen = function() {
-    $('#connection').removeClass('alert-danger')
-                    .addClass('alert-success')
+    $('#connection_status').removeClass('label-danger')
+                    .addClass('label-success')
                     .text('Connected');
     // Create a session.
     send('new session;', function() {
       // Create a new pov to perform try statements.
-      send('new fast private pov;', function(data) {
-        pov_id = data.result;
+      send('new fast private pov;', function(result) {
+        pov_id = result;
         $('#compile').click(function() {
           $('#modal-message').text('Compiling...');
           var modal = $('#modal');
           modal.modal('show');
-          send('compile ' + JSON.stringify($('#orlyscript').val()) + ';', function(data) {
+          send('compile ' + JSON.stringify($('#orlyscript').val()) + ';', function(result) {
             try {
-              var result = data.result;
               load(result.name, result.version);
-              // Uncheck the radio button.
-              $('.dataset').removeClass('active');
             } finally {
               modal.modal('hide');
             }  // try
@@ -298,12 +293,12 @@ require(['jquery', 'bootstrap', 'd3', 'packages'],
       // Bind install/listing functions for each pkg.
       $.each(pkgs, function(name, info) {
         var btn = $('#' + name);
-        btn.change(function() {
-          send('get_source ' + name + ';', function(data) {
+        btn.on('shown.bs.tab', function() {
+          $('#query').removeClass('hide');
+          send('get_source ' + name + ';', function(result) {
             empty();
             $('#function').empty();
             $('#args tbody').empty();
-            var result = data.result;
             $('#orlyscript').val(result.code);
             load(name, info.version);
           });  // get_source
@@ -316,5 +311,4 @@ require(['jquery', 'bootstrap', 'd3', 'packages'],
     keyboard: false,
     show: false,
   });
-  $('.dataset').button();  // Activate buttons.
 });
