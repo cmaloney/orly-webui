@@ -1,6 +1,8 @@
 ### TODOs (Pull Requests are more than welcome!)
 
 - [ ] The dropdown for functions is not labelled. Either a placeholder text or a label horizontally aligned with `parameter` and `argument` would be helpful.
+- [ ] Make SVG window responsive for graph visualization (Might be as simple as adding the css class `col-xs-12`) to the SVG element or the `#graph` element.
+- [ ] Scale up or down the graph to fit within the window. (This needs to happen within `d3`)
 - [ ] It's been pointed out that it's difficult to figure out what the functions do exactly. I think a neat solution for this would be to scroll to the function within the `orlyscript` box and one can read the comment on the function to get the brief description of what it does.
 - [ ] The incremental graph visualization currently only supports going forward one edge at a time by pressing the right-arrow key. A few things here:
   - [ ] Support going backwards, taking off one edge at a time.
